@@ -1,0 +1,74 @@
+using ExcelDataClass;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+
+namespace IMT
+{
+    public class NpcModule
+    {
+        public List<MainNPC> KonwNpcs = new List<MainNPC>();
+        public Dictionary<int, MainNPC> KonwNpcDic = new Dictionary<int, MainNPC>();
+
+        public void AddMainNpc(int npcId)
+        {
+            if (ConfManager.GetConfByName<MainNpcCfg>("MainNpcCfg").ContainsKey(npcId))
+            {
+                MainNPC mainNPC = new MainNPC(npcId);
+                KonwNpcs.Add(mainNPC);
+                if (!KonwNpcDic.ContainsKey(npcId))
+                    KonwNpcDic.Add(npcId, mainNPC);
+                SaveKnowNpcs();
+            }
+            else
+            {
+                Debug.LogError(string.Format("当前性别男，Npc表中没有Id为[{0}]的数据", npcId));
+            }
+        }
+        public MainNPC GetMainNpc(int npcId)
+        {
+            //         if (ES3.KeyExists("KonwNpcs"))
+            //         {
+            //	KonwNpcs = ES3.Load<List<MainNPC>>("KonwNpcs");
+
+            //	foreach (MainNPC mainNPC in KonwNpcs)
+            //	{
+            //		MainNpcCfg cfg = (MainNpcCfg)ConfManager.GetConfByName<MainNpcCfg>("MainNpcCfg")[mainNPC.CfgId];
+            //		if (cfg.Id == npcId)
+            //		{
+            //			return mainNPC;
+            //		}
+            //	}
+            //	return null;
+            //}
+            //return null;
+            MainNPC npc = DictionaryTool.TryGet(KonwNpcDic, npcId);
+            return npc;
+        }
+        public void SaveKnowNpcs()
+        {
+            ES3.Save<List<MainNPC>>("KonwNpcs", KonwNpcs);
+        }
+        public List<MainNPC> GetKnowNpcs()
+        {
+            List<MainNPC> KonwNpcs = new List<MainNPC>();
+            if (ES3.KeyExists("KonwNpcs"))
+            {
+                KonwNpcs = ES3.Load<List<MainNPC>>("KonwNpcs");
+            }
+            return KonwNpcs;
+        }
+        public MainNpcCfg GetNpcCfgById(int id)
+        {
+            MainNpcCfg mainNpcCfg = (MainNpcCfg)ConfManager.GetConfByName<MainNpcCfg>("MainNpcCfg")[id];
+            return mainNpcCfg;
+        }
+
+        public void OnApplicationQuit()
+        {
+            SaveKnowNpcs();
+            Debug.Log("退出时保存");
+        }
+    }
+}
